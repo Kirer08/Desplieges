@@ -1,0 +1,174 @@
+CHULETA DOCKER - EXAMEN AVANZADO
+EJECUCIÓN Y FLAGS (DOCKER RUN)
+[cite_start]Crear y ejecutar: docker run nombre_imagen[cite: 273].
+[cite_start]Asignar nombre: docker run --name nombre_contenedor nombre_imagen[cite: 312].
+[cite_start]Modo interactivo con bash: docker run -it --name nombre_contenedor imagen bash[cite: 318].
+[cite_start]Segundo plano (Detached): Usa -d al ejecutar (ej. docker run -d -p 8282:80...)[cite: 377].
+[cite_start]Mapear Puertos: -p puerto_local:puerto_contendor[cite: 331]. [cite_start]El tráfico del anfitrión va al contenedor[cite: 331].
+[cite_start]Variables de entorno: -e nombre_variable=valor (o --env)[cite: 327, 328].
+
+GESTIÓN DE CONTENEDORES (INSTANCIAS)
+[cite_start]Listar en ejecución: docker ps[cite: 298].
+[cite_start]Listar TODOS (incluidos parados): docker ps -a[cite: 299, 300].
+[cite_start]Arrancar uno parado: docker start nombre_contenedor[cite: 320].
+[cite_start]Conectarse al proceso principal: docker attach nombre_contenedor[cite: 321].
+[cite_start]Consola en contenedor VIVO: docker exec -it nombre_contenedor bash[cite: 322, 323].
+[cite_start]Lanzar comando sin entrar: docker exec nombre_contenedor bash -c comando[cite: 324].
+[cite_start]Copiar archivos (Host -> Contenedor): docker cp ruta_anfitrión nombre_contenedor:ruta_contendor[cite: 333, 334].
+[cite_start]Renombrar: docker rename nombre_antiguo nombre_nuevo[cite: 314, 315].
+[cite_start]Eliminar contenedor: docker rm (id_contenedor | nombre_contenedor)[cite: 301, 302].
+[15:33]Ferrer:
+GESTIÓN DE IMÁGENES (MOLDES INMUTABLES)
+[cite_start]Buscar imagen: docker search XXX[cite: 339].
+[cite_start]Descargar imagen: docker pull nombre_imagen[cite: 340, 341].
+[cite_start]Listar imágenes locales: docker images [nombre_imagen[:tag]][cite: 304, 305].
+[cite_start]Eliminar imagen específica: docker rmi nombre_imagen[cite: 306, 307].
+[cite_start]Limpiar imágenes sin contenedor asociado: docker image prune -a[cite: 308].
+[cite_start]Limpieza total (Borra todo lo parado): docker system prune -a[cite: 309].
+
+CREACIÓN Y SUBIDA A DOCKER HUB
+[cite_start]La nomenclatura estricta es usuario/nombre:etiqueta[cite: 347]. [cite_start]Si omites la etiqueta, por defecto es latest[cite: 350].
+[cite_start]Paso 1 - Crear imagen desde contenedor: docker commit creará una imagen con las capas base más la del contenedor modificado[cite: 368, 376]. [cite_start](Ej. docker commit -a "Autor" -m "Mensaje" contenedor usuario/imagen:v1 [cite: 377]).
+[cite_start]Paso 2 - Etiquetar: docker tag nombre-imagen-local usuario/nombre-imagen:etiqueta[cite: 380, 381].
+[cite_start]Paso 3 - Iniciar sesión: docker login[cite: 382, 383].
+[cite_start]Paso 4 - Subir: docker push usuario/nombre-imagen:etiqueta[cite: 384, 385].
+
+TIPS DE INSTALACIÓN Y PERMISOS
+[cite_start]Virtualización: Requiere virtualización habilitada en la BIOS[cite: 260].
+[cite_start]Windows: Habilitar WSL 2[cite: 262]. [cite_start]NO marcar "Allow Windows Container"[cite: 263].
+[cite_start]Verificar instalación: docker --version[cite: 264, 265].
+Linux (Ejecutar sin sudo):
+[cite_start]sudo usermod -aG docker $USER (Añade usuario al grupo Docker)[cite: 389, 390].
+[cite_start]newgrp docker (Aplica cambios sin reiniciar sesión)[cite: 391].
+[15:37]Goatsy: Diavlo
+[16:20]Ferrer:
+CHULETA DOCKERFILE - CONCEPTOS CLAVE
+DEFINICIÓN Y FUNCIÓN
+[cite_start]Qué es: Es un archivo de texto que contiene las "instrucciones" o la receta para construir una imagen[cite: 464].
+[cite_start]Qué define: Especifica el sistema base que se va a usar, las dependencias que hay que instalar, los archivos a utilizar y cómo debe ejecutarse el programa en cuestión[cite: 256].
+[cite_start]Propósito: Representa el método estándar y automatizado para crear tus propias imágenes personalizadas (lo que se conoce como dockerizar una aplicación)[cite: 360, 544, 546].
+
+EL FLUJO DE TRABAJO (WORKFLOW)
+[cite_start]La secuencia fundamental de trabajo en Docker es: Dockerfile -> build -> Docker Image -> run -> Docker Container[cite: 255, 256, 257, 258].
+El proceso de construir un Dockerfile da como resultado directo una Imagen. [cite_start]Esta imagen resultante es inmutable[cite: 257, 465].
+
+ARQUITECTURA DE CAPAS
+[cite_start]En Docker existen dos formas de crear imágenes propias: a partir de un contenedor modificado (haciendo un commit) o a partir de un Dockerfile[cite: 361, 362, 363].
+[cite_start]Al construir la imagen, las instrucciones del Dockerfile crean una serie de capas apiladas unas sobre otras (la superior es la más reciente), creando un sistema de archivos unificado y optimizando el espacio en disco[cite: 354, 355, 356, 465].
+[16:22]Ferrer:
+IMAGEN BASE (Obligatorio. Siempre es la primera línea)
+Define el punto de partida (ej. ubuntu, alpine, node, python)
+FROM ubuntu:22.04
+
+VARIABLES DE ENTORNO (Opcional)
+Establece variables que estarán disponibles durante la creación y ejecución
+ENV ENTORNO=produccion
+
+DIRECTORIO DE TRABAJO (Recomendado)
+Crea la carpeta dentro del contenedor y se mueve a ella (como hacer un 'cd')
+WORKDIR /mi_aplicacion
+
+COPIAR ARCHIVOS (Del host al contenedor)
+Sintaxis: COPY <origen_en_tu_pc> <destino_en_contenedor>
+El punto (.) significa "todo lo que hay en mi carpeta actual"
+COPY . /mi_aplicacion
+
+EJECUTAR COMANDOS DE INSTALACIÓN (Se ejecuta al hacer 'docker build')
+OJO: Cada instrucción RUN crea una nueva capa en la imagen [cite: 356]
+RUN apt-get update && apt-get install -y python3
+
+EXPONER PUERTOS (Informativo)
+Indica en qué puerto va a escuchar la app (no lo mapea mágicamente al exterior, para eso usas -p en el docker run)
+EXPOSE 8080
+
+COMANDO POR DEFECTO (Se ejecuta al hacer 'docker run')
+Es el proceso principal del contenedor (PID 1). Si este proceso muere, el contenedor se para.
+CMD ["python3", "app.py"]
+
+DOCKERFILE
+# 1. IMAGEN BASE: Se especifica la versión exacta (evitar 'latest' demuestra profesionalidad)
+FROM python:3.9-slim
+
+# 2. DIRECTORIO DE TRABAJO: Se crea la carpeta raíz para el proyecto
+WORKDIR /app
+
+# 3. OPTIMIZACIÓN DE CACHÉ: Se copia PRIMERO solo el archivo de dependencias
+COPY requirements.txt .
+
+# 4. INSTALACIÓN: Se instalan las librerías necesarias durante la fase 'build'
+RUN pip install --no-cache-dir -r requirements.txt
+
+# 5. CÓDIGO FUENTE: Se copia el resto del código de la aplicación DESPUÉS de instalar
+COPY . .
+
+# 6. PUERTO: Se documenta qué puerto usará la aplicación
+EXPOSE 5000
+
+# 7. EJECUCIÓN: El comando que mantendrá vivo al contenedor
+CMD ["python", "app.py"]
+
+
+Basándome en tus apuntes sobre Computación en la Nube, los modelos de nube se dividen principalmente en dos grandes categorías: los Modelos de Servicio (qué te ofrece el proveedor) y los Modelos de Despliegue (cómo y dónde se instalan esos recursos).
+
+Aquí tienes la explicación detallada de cada uno para que los domines de cara al examen:
+1. Modelos de Servicio (El principio "as-a-Service")
+
+Estos modelos definen qué capa de la tecnología gestiona el proveedor y de qué te tienes que encargar tú como cliente. Van de mayor a menor control por tu parte:
+
+    IaaS (Infraestructura como Servicio):
+
+        Qué es: El proveedor te alquila el "hardware vacío" (servidores físicos/virtuales, almacenamiento, redes).
+
+        Tu responsabilidad: Tú te encargas de instalar y mantener el Sistema Operativo, las bases de datos, los parches de seguridad y tus aplicaciones.
+
+        Uso: Migrar servidores tradicionales a la nube teniendo el control total.
+
+        Ejemplos: Amazon EC2, Google Compute Engine, Azure Virtual Machines.
+
+    PaaS (Plataforma como Servicio):
+
+        Qué es: El proveedor gestiona tanto el hardware como el Sistema Operativo y el entorno de ejecución (runtime). Te entregan una plataforma lista para programar.
+
+        Tu responsabilidad: Tú solo te centras en subir tu código fuente y tus aplicaciones. Te olvidas de actualizar Windows o Linux.
+
+        Uso: Entornos de desarrollo ágil donde los programadores solo quieren crear software sin pelearse con los servidores.
+
+        Ejemplos: Google App Engine, Azure App Service.
+
+    CaaS (Contenedores como Servicio):
+
+        Qué es: Un modelo intermedio muy específico para la gestión y orquestación de contenedores (basado normalmente en Kubernetes).
+
+        Uso: Es el modelo ideal y estándar cuando una empresa desarrolla su software utilizando una arquitectura de microservicios.
+
+        Ejemplos: Amazon EKS, Google GKE.
+
+    SaaS (Software como Servicio):
+
+        Qué es: El software está completamente terminado, alojado en la nube y listo para usar, normalmente a través de un navegador web.
+
+        Tu responsabilidad: Ninguna a nivel técnico. Solo pagas la suscripción y lo usas; el proveedor hace todo el mantenimiento.
+
+        Ejemplos: Gmail, Google Workspace, Microsoft 365.
+
+2. Modelos de Despliegue
+
+Estos modelos definen de quién es la infraestructura y quién la comparte:
+
+    Nube Pública: Los servidores y recursos físicos pertenecen al proveedor (AWS, Google, Microsoft) y se comparten entre miles de clientes diferentes a través de Internet. Es el modelo más barato y escalable.
+
+    Nube Privada: La infraestructura física (los servidores) se utiliza de forma exclusiva para una sola organización. Puede estar en las propias oficinas de la empresa (on-premise) o en un centro de datos externo, pero nadie más comparte esos equipos. Es ideal para datos muy sensibles.
+
+    Nube Híbrida: Es la combinación de las dos anteriores. Una empresa mantiene sus datos más críticos en su Nube Privada (por seguridad o normativa), pero se conecta a una Nube Pública para usar su potencia de cálculo masiva cuando hay picos de trabajo.
+
+    Multi-cloud: Ocurre cuando una empresa contrata servicios de múltiples proveedores de nube pública distintos a la vez (por ejemplo, usa bases de datos de AWS y servicios de Inteligencia Artificial de Google Cloud) para evitar depender de una sola empresa (Vendor Lock-in).
+
+💡 Truco para el examen: Recuerda la analogía de la pizza.
+
+    On-Premise: Tú haces la pizza en tu casa (compras los ingredientes, usas tu horno, pagas el gas).
+
+    IaaS: Te dan la cocina y el horno, pero tú pones la masa y cocinas.
+
+    PaaS: Te envían la pizza a casa, tú solo tienes que poner la mesa y la bebida.
+
+    SaaS: Vas a un restaurante, pides la pizza, te la sirven y te recogen la mesa.
