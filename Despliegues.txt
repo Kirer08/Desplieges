@@ -182,7 +182,7 @@ Estos modelos definen de quién es la infraestructura y quién la comparte:
     Instanncias > Seguridad > Grupo de seguridad > launch-wizard-1 - nueva regla
     TCP - 2222 0.0.0.0/0
     Crear imagen
-    Instancia > Acciones > Imagen y plantillas > Crear Imagen
+    Instancia > Acciones > Imagen y plantillas > Crear imagen a partir de una instancia
     Columna lateral AWS
     AMI > "Available"
 
