@@ -172,3 +172,12 @@ Estos modelos definen de quién es la infraestructura y quién la comparte:
     PaaS: Te envían la pizza a casa, tú solo tienes que poner la mesa y la bebida.
 
     SaaS: Vas a un restaurante, pides la pizza, te la sirven y te recogen la mesa.
+
+    AWS
+    Conexión SSH
+    chmod 400 nombre-de-tu-clave.pem
+    SSH a traves del puerto 2222
+    sudo nano /etc/ssh/sshd_config
+    Port 2222
+    Instanncias > Seguridad > Grupo de seguridad > launch-wizard-1 - nueva regla
+    TCP - 2222 0.0.0.0/0
