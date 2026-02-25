@@ -185,3 +185,9 @@ Estos modelos definen de quién es la infraestructura y quién la comparte:
     Instancia > Acciones > Imagen y plantillas > Crear Imagen
     Columna lateral AWS
     AMI > "Available"
+
+
+    Borrar historial de la sesión actual (en memoria):
+    history -c
+    Borrar y sobrescribir el archivo de historial permanentemente:
+    history -cw
