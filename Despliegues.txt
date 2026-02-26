@@ -107,6 +107,27 @@ EXPOSE 5000
 # 7. EJECUCIÓN: El comando que mantendrá vivo al contenedor
 CMD ["python", "app.py"]
 
+# 1. IMAGEN BASE: Se especifica la versión exacta (evitar 'latest' demuestra profesionalidad)
+FROM python:3.9-slim
+
+# 2. DIRECTORIO DE TRABAJO: Se crea la carpeta raíz para el proyecto
+WORKDIR /app
+
+# 3. OPTIMIZACIÓN DE CACHÉ: Se copia PRIMERO solo el archivo de dependencias
+COPY requirements.txt .
+
+# 4. INSTALACIÓN: Se instalan las librerías necesarias durante la fase 'build'
+RUN pip install --no-cache-dir -r requirements.txt
+
+# 5. CÓDIGO FUENTE: Se copia el resto del código de la aplicación DESPUÉS de instalar
+COPY . .
+
+# 6. PUERTO: Se documenta qué puerto usará la aplicación
+EXPOSE 5000
+
+# 7. EJECUCIÓN: El comando que mantendrá vivo al contenedor
+CMD ["python", "app.py"]
+
 
 Basándome en tus apuntes sobre Computación en la Nube, los modelos de nube se dividen principalmente en dos grandes categorías: los Modelos de Servicio (qué te ofrece el proveedor) y los Modelos de Despliegue (cómo y dónde se instalan esos recursos).
 
