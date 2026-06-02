@@ -38,30 +38,25 @@ cd ~/ejer_2_Ferrer
 echo "<?php phpinfo(); ?>" > index.php
 
 # 3. Abrir gedit para crear el Dockerfile
-gedit Dockerfile &
+gedit dockerfile_ferrer &
 
 ### Pega exactamente este contenido dentro del editor de texto gedit, guárdalo y ciérralo:
 
 FROM php:8.2-apache
 
-RUN apt update && apt install -y default-mysql-client curl
-RUN docker-php-ext-install mysqli
+RUN apt update && apt install -y curl
+
 
 COPY index.php /var/www/html/
 
 EXPOSE 80
-
-ENV DB_HOST=db
-ENV DB_USER=root
-ENV DB_PASS=examen123
-ENV DB_NAME=examen_db
 
 ENTRYPOINT ["apache2ctl"]
 CMD ["-D", "FOREGROUND"]
 
 ### Vuelve a la terminal y construye la imagen:
 # 4. Construir la imagen asignándole el nombre "php_ferrer"
-docker build -t php_ferrer .
+docker build -t dockerfile_ferrer .
 
 ############
 Ejercicio 3:
