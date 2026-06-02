@@ -46,7 +46,6 @@ FROM php:8.2-apache
 
 RUN apt update && apt install -y curl
 
-
 COPY index.php /var/www/html/
 
 EXPOSE 80
