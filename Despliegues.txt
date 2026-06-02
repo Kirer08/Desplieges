@@ -1,68 +1,80 @@
 CHULETA DOCKER - EXAMEN AVANZADO
 
-Ejercicio 1: Contenedores independientes con persistencia
-Creamos la carpeta del ejercicio, entramos en ella y generamos el archivo comandos.txt (usando gedit como pide el examen) para dejar guardados los comandos válidos:
+############
+Ejercicio 1:
+############
+
+# 1. Crear la carpeta del ejercicio y entrar en ella
 mkdir -p ~/ejer_1_Ferrer
 cd ~/ejer_1_Ferrer
-gedit comandos.txt &
 
-Nota: Copia y pega los siguientes comandos dentro de la ventana de gedit, guárdalo y cierra el editor.
-# 1. Crear la red bridge personalizada para el ejercicio 1
+# 2. Crear la página index.html con tu nombre
+echo "<h1>Contenido de Ferrer</h1>" > index.html
+
+# 3. Crear la red personalizada red1_Ferrer con el direccionamiento pedido
 docker network create -d bridge --subnet 192.168.1.0/24 red1_Ferrer
-# 2. Crear el contenedor de Apache (httpd) con volumen bind mount
-# Recuerda crear antes un archivo index.html básico en tu carpeta actual con tu nombre
-echo "<h1>Servidor de Ferrer</h1>" > index.html
+
+# 4. Levantar el contenedor apache (httpd) con bind mount (persistencia de carpeta local)
 docker run -d --name apache --network red1_Ferrer --mount type=bind,src=$(pwd)/index.html,dst=/usr/local/apache2/htdocs/index.html httpd:2.4
-# 3. Crear el contenedor de Nginx con volumen nombrado autónomo
+
+# 5. Crear un volumen para nginx llamado "web"
+docker volume create web
+
+# 6. Levantar el contenedor nginx con el volumen "web"
 docker run -d --name nginx --network red1_Ferrer --mount type=volume,src=web,dst=/usr/share/nginx/html nginx
 
-Ejercicio 2: Construcción de imagen propia con Dockerfile
-Cambiamos a la carpeta del segundo ejercicio, creamos el archivo index.php solicitado y editamos el Dockerfile de forma automatizada:
+# 7. Parar los contenedores al terminar, como pide el enunciado
+docker stop apache nginx
+
+############
+Ejercicio 2:
+############
+
+# 1. Crear la carpeta del ejercicio y entrar en ella
 mkdir -p ~/ejer_2_Ferrer
 cd ~/ejer_2_Ferrer
-# 1. Crear el archivo index.php con un código básico de prueba
+
+# 2. Crear el archivo index.php (usaremos un phpinfo básico para comprobar que funciona)
 echo "<?php phpinfo(); ?>" > index.php
-# 2. Abrir gedit para escribir el Dockerfile
+
+# 3. Abrir gedit para crear el Dockerfile
 gedit Dockerfile &
 
-Copia y pega este contenido exacto dentro del Dockerfile, guárdalo y ciérralo:
-# Partiendo de la imagen base oficial solicitada
+### Pega exactamente este contenido dentro del editor de texto gedit, guárdalo y ciérralo:
+
 FROM php:8.2-apache
 
-# Actualizar repositorios e instalar los paquetes requeridos de forma desatendida (-y)
 RUN apt update && apt install -y default-mysql-client curl
-
-# Instalar la extensión de PHP necesaria para interactuar con MySQL
 RUN docker-php-ext-install mysqli
 
-# Copiar el archivo index.php local al directorio correspondiente de la imagen
 COPY index.php /var/www/html/
 
-# Configurar las variables de entorno solicitadas en el examen
+EXPOSE 80
+
 ENV DB_HOST=db
 ENV DB_USER=root
 ENV DB_PASS=examen123
 ENV DB_NAME=examen_db
 
-# Informar que la imagen escucha por el puerto 80
-EXPOSE 80
-
-# Definir el ejecutable y sus argumentos por defecto de forma flexible
 ENTRYPOINT ["apache2ctl"]
 CMD ["-D", "FOREGROUND"]
 
-Una vez cerrado el editor, ejecuta la construcción de la imagen en tu terminal:  
-# 3. Construir la imagen local bajo el nombre "php-web:v1"
-docker build -t php-web:v1 .
+### Vuelve a la terminal y construye la imagen:
+# 4. Construir la imagen asignándole el nombre "php_ferrer"
+docker build -t php_ferrer .
 
-📁 Ejercicio 3: Despliegue multicontenedor con Docker Compose
-Pasamos al último ejercicio, clonamos el contenido del Ejercicio 2 dentro de este espacio (tal y como exige el enunciado) y creamos el orquestador:  
+############
+Ejercicio 3:
+############
 
+# 1. Crear la carpeta del ejercicio 3 y entrar en ella
 mkdir -p ~/ejer_3_Ferrer
 cd ~/ejer_3_Ferrer
-# 1. Copiar el entorno de construcción anterior aquí dentro
-cp -r ~/ejer_2_Ferrer/. .
-# 2. Abrir gedit para estructurar el escenario declarativo
+
+# 2. Copiar todo el contenido del ejercicio 2 aquí (como pide el enunciado)
+cp -r ~/ejer_2_Ferrer/* .
+
+# 3. Abrir gedit para crear el archivo compose.yaml
 gedit compose.yaml &
 
 Copia y pega esta configuración estructurada dentro de compose.yaml, guarda y cierra:
@@ -70,18 +82,16 @@ services:
 
   db:
     image: mysql:8
-    container_name: contenedor_db
+    volumes:
+      - db_data:/var/lib/mysql
     environment:
       - MYSQL_ROOT_PASSWORD=examen123
       - MYSQL_DATABASE=examen_db
-    volumes:
-      - db_data:/var/lib/mysql
     networks:
       - red3_Ferrer
 
   web:
-    build: .  # Al haber copiado el Dockerfile aquí, se construye en el contexto local
-    container_name: contenedor_web
+    build: .
     ports:
       - "8585:80"
     depends_on:
@@ -91,7 +101,6 @@ services:
 
   adminer:
     image: adminer
-    container_name: contenedor_adminer
     ports:
       - "9090:8080"
     networks:
@@ -104,27 +113,50 @@ networks:
   red3_Ferrer:
     driver: bridge
     ipam:
-      driver: default
       config:
         - subnet: 192.168.20.0/24
           gateway: 192.168.20.254
 
-Una vez que cierres gedit, lanza la infraestructura completa y realiza las comprobaciones finales desde tu terminal:  
-# 3. Desplegar los servicios en segundo plano
+###Vuelve a la terminal y arranca el entorno:
+# 4. Levantar todos los contenedores en segundo plano
 docker compose up -d
-# 4. Comprobar que los tres contenedores se encuentran levantados (Up)
+
+# 5. Comprobar que están funcionando (haz captura de esto para LibreOffice)
 docker compose ps
 
-Comprobación final en el navegador:
+### Comprobación final en el navegador:
 
-    Abre tu navegador web en Ubuntu e introduce http://localhost:9090 para entrar a Adminer.
+Comprobaciones finales para sacar los pantallazos del LibreOffice:
 
-    Selecciona como motor MySQL, en servidor escribe db, introduce el usuario root, la contraseña examen123 y accede a la base de datos examen_db.
+    La web en PHP: Abre Firefox o Chrome en la máquina de IsardVDI y entra en http://localhost:8585. Debería salirte la pantalla morada de phpinfo() (Haz pantallazo).
 
-    Haz clic en la sección de comandos SQL, pega la sentencia de creación de tabla e inserción de datos proporcionada en la hoja del examen y pulsa ejecutar.
+    El gestor Adminer: Entra en http://localhost:9090.
 
-    Para terminar, abre otra pestaña en http://localhost:8585 para verificar el acceso a la aplicación web PHP. ¡Listo!
+    Inicio de sesión en Adminer:
 
+        Sistema: MySQL
+
+        Servidor: db
+
+        Usuario: root
+
+        Contraseña: examen123
+
+        Base de datos: examen_db
+
+    Sentencia SQL: Una vez dentro, ve al apartado "Comando SQL", pega el código que te da el examen y ejecútalo (haz pantallazo del éxito):
+
+### SQL
+
+CREATE TABLE usuarios(
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nombre VARCHAR(50),
+  email VARCHAR(50)
+);
+
+INSERT INTO usuarios(nombre, email) VALUES ('Ferrer', 'ferrer@midominio.com');
+
+#################################
 AWS
 Conexión SSH
 chmod 400 nombre-de-tu-clave.pem
