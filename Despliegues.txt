@@ -129,7 +129,9 @@ docker compose ps
 AWS
 Conexión SSH
 chmod 400 nombre-de-tu-clave.pem
+ssh -i nombre-de-tu-clave.pem ip-instancia
 SSH a traves del puerto 2222
+ssh -i nombre-de-tu-clave.pem ip-instancia -p 2222
 sudo nano /etc/ssh/sshd_config
 Port 2222
 Instanncias > Seguridad > Grupo de seguridad > launch-wizard-1 - nueva regla
