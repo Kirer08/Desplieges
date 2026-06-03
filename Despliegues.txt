@@ -124,39 +124,8 @@ docker exec -it ejer_3_tunombre-contenedor1-1 bash -c 'echo "Página volumen tu 
 # 6. Comprobar que están funcionando (haz captura de esto para LibreOffice)
 docker compose ps
 
-### Comprobación final en el navegador:
-
-Comprobaciones finales para sacar los pantallazos del LibreOffice:
-
-    La web en PHP: Abre Firefox o Chrome en la máquina de IsardVDI y entra en http://localhost:8585. Debería salirte la pantalla morada de phpinfo() (Haz pantallazo).
-
-    El gestor Adminer: Entra en http://localhost:9090.
-
-    Inicio de sesión en Adminer:
-
-        Sistema: MySQL
-
-        Servidor: db
-
-        Usuario: root
-
-        Contraseña: examen123
-
-        Base de datos: examen_db
-
-    Sentencia SQL: Una vez dentro, ve al apartado "Comando SQL", pega el código que te da el examen y ejecútalo (haz pantallazo del éxito):
-
-### SQL
-
-CREATE TABLE usuarios(
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  nombre VARCHAR(50),
-  email VARCHAR(50)
-);
-
-INSERT INTO usuarios(nombre, email) VALUES ('Ferrer', 'ferrer@midominio.com');
-
 #################################
+
 AWS
 Conexión SSH
 chmod 400 nombre-de-tu-clave.pem
