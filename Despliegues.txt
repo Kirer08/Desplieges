@@ -45,7 +45,7 @@ gedit dockerfile_ferrer &
 
 ### Pega exactamente este contenido dentro del editor de texto gedit, guárdalo y ciérralo:
 
-FROM php:8.2-apache
+FROM debian
 
 RUN apt update && apt install -y apache2 libapache2-mod-php php
 
@@ -61,7 +61,7 @@ CMD ["-D", "FOREGROUND"]
 docker build -t dockerfile_ferrer .
 
 # 5. Levantar contenedor con la imagen del dockerfile
-docker run -d --name ferrer_php -p 8082:80 php_ferrer
+docker run -d --name ferrer_php php_ferrer
 
 ############
 Ejercicio 3:
@@ -107,7 +107,7 @@ volumes:
   sobre:
 
 networks:
-  red_personalizada:
+  red3_Ferrer:
     driver: bridge
     ipam:
       config:
@@ -119,7 +119,7 @@ networks:
 docker compose up -d
 
 # 5. Modificar la página por defecto para que tenga contenido:
-docker exec -it ejer_3_tunombre-contenedor1-1 bash -c 'echo "Página volumen tu nombre" > /usr/share/nginx/html/index.html'
+docker exec -it ejer_3_tunombre-contenedor1-1 bash -c 'echo "Página volumen ferrer" > /usr/share/nginx/html/index.html'
 
 # 6. Comprobar que están funcionando (haz captura de esto para LibreOffice)
 docker compose ps
