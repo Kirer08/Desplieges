@@ -1,4 +1,4 @@
-CHULETA DOCKER - EXAMEN AVANZADO
+EXAMEN AVANZADO
 
 ############
 Ejercicio 1:
@@ -9,7 +9,7 @@ mkdir -p ~/ejer_1_Ferrer
 cd ~/ejer_1_Ferrer
 
 # 2. Crear la página index.html con tu nombre
-echo "<h1>Contenido de Ferrer</h1>" > index.html
+echo "contenido Ferrer" > index.html
 
 # 3. Crear la red personalizada red1_Ferrer con el direccionamiento pedido
 docker network create -d bridge --subnet 192.168.1.0/24 red1_Ferrer
@@ -23,7 +23,10 @@ docker volume create web
 # 6. Levantar el contenedor nginx con el volumen "web"
 docker run -d --name nginx --network red1_Ferrer --mount type=volume,src=web,dst=/usr/share/nginx/html nginx
 
-# 7. Parar los contenedores al terminar, como pide el enunciado
+# 7. Modificar la página por defecto de Nginx:
+docker exec nginx bash -c 'echo "tunombre_nginx" > /usr/share/nginx/html/index.html'
+
+# 8. Parar los contenedores al terminar, como pide el enunciado
 docker stop apache nginx
 
 ############
@@ -44,9 +47,9 @@ gedit dockerfile_ferrer &
 
 FROM php:8.2-apache
 
-RUN apt update && apt install -y curl
+RUN apt update && apt install -y apache2 libapache2-mod-php php
 
-COPY index.php /var/www/html/
+COPY app/ /var/www/html/
 
 EXPOSE 80
 
@@ -56,6 +59,9 @@ CMD ["-D", "FOREGROUND"]
 ### Vuelve a la terminal y construye la imagen:
 # 4. Construir la imagen asignándole el nombre "php_ferrer"
 docker build -t dockerfile_ferrer .
+
+# 5. Levantar contenedor con la imagen del dockerfile
+docker run -d --name ferrer_php -p 8082:80 php_ferrer
 
 ############
 Ejercicio 3:
@@ -71,51 +77,51 @@ cp -r ~/ejer_2_Ferrer/* .
 # 3. Abrir gedit para crear el archivo compose.yaml
 gedit compose.yaml &
 
-Copia y pega esta configuración estructurada dentro de compose.yaml, guarda y cierra:
 services:
-
-  db:
-    image: mysql:8
+  contenedor1:
+    image: nginx
+    ports:
+      - "9091:80"
     volumes:
-      - db_data:/var/lib/mysql
-    environment:
-      - MYSQL_ROOT_PASSWORD=examen123
-      - MYSQL_DATABASE=examen_db
+      - sobre:/usr/share/nginx/html
     networks:
       - red3_Ferrer
+    depends_on:
+      - contenedor2  # Garantiza que el contenedor 2 se lance antes
 
-  web:
-    build: .
+  contenedor2:
+    build: .  # Utiliza el Dockerfile copiado del Ejercicio 2
     ports:
       - "8585:80"
-    depends_on:
-      - db
-    networks:
-      - red3_Ferrer
+    environment:
+      - NOMBRE=Ferrer
 
-  adminer:
-    image: adminer
+  contenedor3:
+    image: nginx
     ports:
-      - "9090:8080"
+      - "9093:80"
     networks:
       - red3_Ferrer
 
 volumes:
-  db_data:
+  sobre:
 
 networks:
-  red3_Ferrer:
+  red_personalizada:
     driver: bridge
     ipam:
       config:
-        - subnet: 192.168.20.0/24
-          gateway: 192.168.20.254
+        - subnet: 192.168.10.0/24
+          gateway: 192.168.10.254
 
 ###Vuelve a la terminal y arranca el entorno:
 # 4. Levantar todos los contenedores en segundo plano
 docker compose up -d
 
-# 5. Comprobar que están funcionando (haz captura de esto para LibreOffice)
+# 5. Modificar la página por defecto para que tenga contenido:
+docker exec -it ejer_3_tunombre-contenedor1-1 bash -c 'echo "Página volumen tu nombre" > /usr/share/nginx/html/index.html'
+
+# 6. Comprobar que están funcionando (haz captura de esto para LibreOffice)
 docker compose ps
 
 ### Comprobación final en el navegador:
