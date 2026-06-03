@@ -116,7 +116,7 @@ networks:
 
 ###Vuelve a la terminal y arranca el entorno:
 # 4. Levantar todos los contenedores en segundo plano
-docker compose up -d
+docker compose up
 
 # 5. Modificar la página por defecto para que tenga contenido:
 docker exec -it ejer_3_tunombre-contenedor1-1 bash -c 'echo "Página volumen ferrer" > /usr/share/nginx/html/index.html'
